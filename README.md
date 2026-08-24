@@ -8,6 +8,20 @@ SpinPods 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `C
 
 左右耳的传感器读数不能混用：相同放置方式下，右耳在 33 和 45 档分别比左耳重复测量均值高约 **0.52%** 和 **0.64%**。为保证历史数据可比，应固定使用同一侧 AirPod；当前基线沿用左耳。
 
+## 下一阶段平台范围
+
+正式 app 将采用一个 SwiftUI Universal target，同时支持 iPhone 和 iPad，共用 `SpinPodsCore`、Core Motion 采集、滤波、历史记录和导出逻辑。
+
+iPad 不是简单放大 iPhone 界面，需要从第一版覆盖：
+
+- 横屏、竖屏和可变窗口尺寸；
+- Split View / Stage Manager 下的紧凑与宽屏布局；
+- 键盘、触控板和触控操作；
+- 测量过程中窗口尺寸与场景状态变化；
+- 与 iPhone 相同的 AirPods 权限、左右耳、离耳和连接中断真机测试。
+
+GitHub Actions 将分别执行 iPhone 与 iPad Simulator 的构建和界面测试；AirPods IMU 功能仍需各使用至少一台真实 iPhone 和 iPad 验证。
+
 ## 功能
 
 - 检查运动权限和兼容 AirPods 的数据可用性
