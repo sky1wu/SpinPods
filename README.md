@@ -22,6 +22,8 @@ iPad 不是简单放大 iPhone 界面，需要从第一版覆盖：
 
 GitHub Actions 将分别执行 iPhone 与 iPad Simulator 的构建和界面测试；AirPods IMU 功能仍需各使用至少一台真实 iPhone 和 iPad 验证。
 
+开发阶段暂不依赖付费 Apple Developer Program。CI 将额外使用 `iphoneos` device SDK 生成未签名、可重签名的 `SpinPods-unsigned.ipa` artifact，再由本地 AltStore Classic / AltServer 使用普通 Apple ID 重签并安装到 iPhone 或 iPad。完整流程及限制见[无付费开发者账号的安装方案](docs/SIDELOADING.md)。
+
 ## 功能
 
 - 检查运动权限和兼容 AirPods 的数据可用性
@@ -86,6 +88,7 @@ Sources/SpinPodsCoreChecks/    零依赖算法检查
 Sources/SpinPodsMac/           SwiftUI 界面、Core Motion 采样和 CSV 导出
 scripts/build-app.sh           编译、组装和签名 .app
 scripts/run-app.sh             构建并启动
+scripts/package-unsigned-ipa.sh 将 device .app 打包为可重签名 IPA
 ```
 
 API 依据：[CMHeadphoneMotionManager](https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager)、[NSMotionUsageDescription](https://developer.apple.com/documentation/bundleresources/information-property-list/nsmotionusagedescription)。Apple 明确要求 iOS 和 macOS 应用提供运动数据用途声明，并建议在采样前检查 `isDeviceMotionAvailable`。

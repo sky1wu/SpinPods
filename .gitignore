@@ -3,8 +3,9 @@
 .swiftpm/
 DerivedData/
 *.xcuserstate
+*.xcarchive
+*.ipa
 
 # Locally exported measurements
 Exports/
 *.csv
-
