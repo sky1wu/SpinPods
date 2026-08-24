@@ -20,7 +20,8 @@ struct SpinPodsCoreChecks {
             ("outlier rejection", checkOutlierRejection),
             ("rolling window expiry", checkRollingWindowExpiry),
             ("stability detection", checkStabilityDetection),
-            ("standard speed matching", checkStandardSpeedMatching)
+            ("standard speed matching", checkStandardSpeedMatching),
+            ("target tolerance assessment", checkTargetToleranceAssessment)
         ]
 
         for (name, check) in checks {
@@ -124,5 +125,26 @@ struct SpinPodsCoreChecks {
         try expect(speed == .rpm45, "Expected 45 RPM speed")
         let error = speed.errorPercent(measuredRPM: 44.55)
         try expect(abs(error + 1) < 0.000_001, "Expected -1% error, got \(error)")
+    }
+
+    private static func checkTargetToleranceAssessment() throws {
+        let center = TurntableSpeed.rpm45.assess(measuredRPM: 45, tolerancePercent: 1)
+        try expect(abs(center.lowerBoundRPM - 44.55) < 0.000_001, "Unexpected lower bound")
+        try expect(abs(center.upperBoundRPM - 45.45) < 0.000_001, "Unexpected upper bound")
+        try expect(center.status == .withinRange, "Target speed should be in range")
+
+        let upperBoundary = TurntableSpeed.rpm45.assess(
+            measuredRPM: center.upperBoundRPM,
+            tolerancePercent: 1
+        )
+        try expect(upperBoundary.status == .withinRange, "Tolerance boundary should be inclusive")
+
+        let fast = TurntableSpeed.rpm45.assess(measuredRPM: 45.5, tolerancePercent: 1)
+        try expect(fast.status == .tooFast, "45.5 RPM should be too fast")
+        try expect(abs(fast.differenceRPM - 0.5) < 0.000_001, "Unexpected fast difference")
+
+        let slow = TurntableSpeed.rpm45.assess(measuredRPM: 44.5, tolerancePercent: 1)
+        try expect(slow.status == .tooSlow, "44.5 RPM should be too slow")
+        try expect(abs(slow.differenceRPM + 0.5) < 0.000_001, "Unexpected slow difference")
     }
 }

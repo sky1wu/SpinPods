@@ -20,5 +20,15 @@ public enum TurntableSpeed: String, CaseIterable, Sendable {
     public func errorPercent(measuredRPM: Double) -> Double {
         (measuredRPM - rpm) / rpm * 100
     }
-}
 
+    public func assess(
+        measuredRPM: Double,
+        tolerancePercent: Double = 1
+    ) -> SpeedAssessment {
+        SpeedAssessment(
+            measuredRPM: measuredRPM,
+            targetRPM: rpm,
+            tolerancePercent: tolerancePercent
+        )
+    }
+}
