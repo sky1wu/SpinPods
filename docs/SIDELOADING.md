@@ -6,7 +6,7 @@
 
 ```text
 GitHub Actions
-  ├─ iPhone/iPad Simulator 构建与测试
+  ├─ 核心算法检查与 iPhone/iPad Simulator 构建
   └─ iphoneos 无签名构建
        └─ SpinPods-unsigned.ipa artifact
             └─ AltStore Classic / AltServer 本地重签
@@ -17,9 +17,9 @@ GitHub Actions
 
 ## CI 输出要求
 
-创建 iPhone/iPad Universal target 后，GitHub Actions 应执行两类构建：
+GitHub Actions 会对 iPhone/iPad Universal target 执行两类构建：
 
-1. 使用 iOS Simulator SDK 编译和运行单元/UI 测试，不需要代码签名。
+1. 运行 `SpinPodsCoreChecks`，并使用 iOS Simulator SDK 分别编译 iPhone 和 iPad 版本，不需要代码签名。
 2. 使用 `iphoneos` device SDK 和 `CODE_SIGNING_ALLOWED=NO` 编译真机 `.app`，再按标准 IPA 目录结构打包：
 
 ```text

@@ -1,0 +1,102 @@
+name: iOS and iPadOS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Universal app and IPA
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Run core checks
+        run: swift run SpinPodsCoreChecks
+
+      - name: Select iPhone and iPad simulators
+        id: simulators
+        shell: bash
+        run: |
+          devices_json=$(xcrun simctl list devices available --json)
+          iphone_udid=$(ruby -rjson -e '
+            devices = JSON.parse(STDIN.read).fetch("devices").values.flatten
+            match = devices.find { |device| device["isAvailable"] && device["name"].start_with?("iPhone") }
+            abort "No available iPhone Simulator" unless match
+            puts match.fetch("udid")
+          ' <<< "$devices_json")
+          ipad_udid=$(ruby -rjson -e '
+            devices = JSON.parse(STDIN.read).fetch("devices").values.flatten
+            match = devices.find { |device| device["isAvailable"] && device["name"].start_with?("iPad") }
+            abort "No available iPad Simulator" unless match
+            puts match.fetch("udid")
+          ' <<< "$devices_json")
+          echo "iphone=$iphone_udid" >> "$GITHUB_OUTPUT"
+          echo "ipad=$ipad_udid" >> "$GITHUB_OUTPUT"
+
+      - name: Build for iPhone Simulator
+        run: |
+          xcodebuild \
+            -project SpinPods.xcodeproj \
+            -scheme SpinPods \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulators.outputs.iphone }}' \
+            -derivedDataPath DerivedData/iPhone \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Build for iPad Simulator
+        run: |
+          xcodebuild \
+            -project SpinPods.xcodeproj \
+            -scheme SpinPods \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulators.outputs.ipad }}' \
+            -derivedDataPath DerivedData/iPad \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Build unsigned device app
+        run: |
+          xcodebuild \
+            -project SpinPods.xcodeproj \
+            -scheme SpinPods \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath DerivedData/Device \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          ./scripts/package-unsigned-ipa.sh \
+            DerivedData/Device/Build/Products/Release-iphoneos/SpinPods.app \
+            .artifacts/SpinPods-unsigned.ipa
+          unzip -t .artifacts/SpinPods-unsigned.ipa
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpinPods-unsigned-${{ github.sha }}
+          path: .artifacts/SpinPods-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14

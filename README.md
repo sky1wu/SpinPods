@@ -1,6 +1,6 @@
-# SpinPods Mac 验证器
+# SpinPods
 
-SpinPods 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `CMHeadphoneMotionManager` API 读取 AirPods 运动数据，用陀螺仪角速度估算黑胶唱机转速，并保存原始 CSV 供复核。
+SpinPods 通过 Apple 的公开 `CMHeadphoneMotionManager` API 读取 AirPods 运动数据，用陀螺仪角速度估算黑胶唱机转速。仓库包含已完成硬件可行性验证的 Mac 原型，以及共用同一算法和采样逻辑的 iPhone/iPad Universal app。
 
 > AirPods 4 ANC 实测确认：关闭“自动人耳检测”后，AirPod 离耳放置于转盘时可持续取得运动数据；保持开启时离耳不上报。33 ⅓ 和 45 RPM 测试均获得稳定读数，详见[可行性报告](docs/FEASIBILITY_REPORT.md)。
 
@@ -10,9 +10,9 @@ SpinPods 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `C
 
 ## 下一阶段平台范围
 
-正式 app 将采用一个 SwiftUI Universal target，同时支持 iPhone 和 iPad，共用 `SpinPodsCore`、Core Motion 采集、滤波、历史记录和导出逻辑。
+当前 app 采用一个 SwiftUI Universal target，同时支持 iPhone 和 iPad，共用 `SpinPodsCore`、Core Motion 采集、滤波、历史记录和导出逻辑。
 
-iPad 不是简单放大 iPhone 界面，需要从第一版覆盖：
+iPad 不是简单放大 iPhone 界面，首版已使用自适应容器，后续需通过真机覆盖：
 
 - 横屏、竖屏和可变窗口尺寸；
 - Split View / Stage Manager 下的紧凑与宽屏布局；
@@ -20,7 +20,7 @@ iPad 不是简单放大 iPhone 界面，需要从第一版覆盖：
 - 测量过程中窗口尺寸与场景状态变化；
 - 与 iPhone 相同的 AirPods 权限、左右耳、离耳和连接中断真机测试。
 
-GitHub Actions 将分别执行 iPhone 与 iPad Simulator 的构建和界面测试；AirPods IMU 功能仍需各使用至少一台真实 iPhone 和 iPad 验证。
+GitHub Actions 将分别执行 iPhone 与 iPad Simulator 构建检查；自适应界面和 AirPods IMU 功能仍需各使用至少一台真实 iPhone 和 iPad 验证。
 
 开发阶段暂不依赖付费 Apple Developer Program。CI 将额外使用 `iphoneos` device SDK 生成未签名、可重签名的 `SpinPods-unsigned.ipa` artifact，再由本地 AltStore Classic / AltServer 使用普通 Apple ID 重签并安装到 iPhone 或 iPad。完整流程及限制见[无付费开发者账号的安装方案](docs/SIDELOADING.md)。
 
@@ -35,6 +35,14 @@ GitHub Actions 将分别执行 iPhone 与 iPad Simulator 的构建和界面测�
 - 提供零第三方依赖的算法检查程序
 
 ## 系统要求
+
+在 iPhone/iPad 上运行 Universal app：
+
+- iOS 17 / iPadOS 17 或更高版本
+- 支持耳机运动数据的 AirPods
+- 使用 AltStore 侧载时需要普通 Apple ID，但不需要付费开发者账号
+
+在 Mac 上构建和运行验证器：
 
 - macOS 14 或更高版本
 - 支持耳机运动数据的 AirPods，且已经通过蓝牙连接至 Mac
@@ -82,13 +90,21 @@ RPM = |ω| × 60 / (2π)
 ## 项目结构
 
 ```text
-App/Info.plist                 应用元数据和运动权限用途声明
+App/                           Mac/iOS 应用元数据和运动权限声明
 Sources/SpinPodsCore/          与 Apple 框架解耦的 RPM 算法
 Sources/SpinPodsCoreChecks/    零依赖算法检查
 Sources/SpinPodsMac/           SwiftUI 界面、Core Motion 采样和 CSV 导出
+Sources/SpinPodsIOS/           iPhone/iPad Universal SwiftUI 界面
+SpinPods.xcodeproj/            无第三方生成器的 Universal app 工程
 scripts/build-app.sh           编译、组装和签名 .app
 scripts/run-app.sh             构建并启动
 scripts/package-unsigned-ipa.sh 将 device .app 打包为可重签名 IPA
 ```
+
+## iPhone / iPad CI 构建
+
+推送到 GitHub 后，[iOS and iPadOS](.github/workflows/ios.yml) workflow 会依次运行核心算法检查、iPhone Simulator 构建、iPad Simulator 构建和无签名 `iphoneos` Release 构建，并上传 `SpinPods-unsigned.ipa`。当前工程最低支持 iOS/iPadOS 17，target 同时包含 iPhone 与 iPad device family。
+
+Simulator 只能验证编译和自适应界面，不能提供 AirPods 耳机运动数据。真机安装与验证方式见[无付费开发者账号的安装方案](docs/SIDELOADING.md)。
 
 API 依据：[CMHeadphoneMotionManager](https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager)、[NSMotionUsageDescription](https://developer.apple.com/documentation/bundleresources/information-property-list/nsmotionusagedescription)。Apple 明确要求 iOS 和 macOS 应用提供运动数据用途声明，并建议在采样前检查 `isDeviceMotionAvailable`。
