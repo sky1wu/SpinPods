@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		110000000000000000000001 /* SpinPodsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220000000000000000000001 /* SpinPodsApp.swift */; };
 		110000000000000000000002 /* SpinPodsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220000000000000000000002 /* SpinPodsContentView.swift */; };
+		110000000000000000000003 /* RPMTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220000000000000000000003 /* RPMTrendChart.swift */; };
 		110000000000000000000004 /* HeadphoneMotionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220000000000000000000004 /* HeadphoneMotionMonitor.swift */; };
 		110000000000000000000005 /* RecordedMotionSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220000000000000000000005 /* RecordedMotionSample.swift */; };
 		110000000000000000000007 /* SpinPodsCore in Frameworks */ = {isa = PBXBuildFile; productRef = BB0000000000000000000001 /* SpinPodsCore */; };
@@ -17,6 +18,7 @@
 /* Begin PBXFileReference section */
 		220000000000000000000001 /* SpinPodsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinPodsApp.swift; sourceTree = "<group>"; };
 		220000000000000000000002 /* SpinPodsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinPodsContentView.swift; sourceTree = "<group>"; };
+		220000000000000000000003 /* RPMTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RPMTrendChart.swift; sourceTree = "<group>"; };
 		220000000000000000000004 /* HeadphoneMotionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadphoneMotionMonitor.swift; sourceTree = "<group>"; };
 		220000000000000000000005 /* RecordedMotionSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordedMotionSample.swift; sourceTree = "<group>"; };
 		220000000000000000000007 /* SpinPodsIOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SpinPodsIOS-Info.plist"; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 			children = (
 				220000000000000000000001 /* SpinPodsApp.swift */,
 				220000000000000000000002 /* SpinPodsContentView.swift */,
+				220000000000000000000003 /* RPMTrendChart.swift */,
 			);
 			path = Sources/SpinPodsIOS;
 			sourceTree = "<group>";
@@ -157,6 +160,7 @@
 			files = (
 				110000000000000000000001 /* SpinPodsApp.swift in Sources */,
 				110000000000000000000002 /* SpinPodsContentView.swift in Sources */,
+				110000000000000000000003 /* RPMTrendChart.swift in Sources */,
 				110000000000000000000004 /* HeadphoneMotionMonitor.swift in Sources */,
 				110000000000000000000005 /* RecordedMotionSample.swift in Sources */,
 			);
