@@ -1,6 +1,6 @@
 import CoreMotion
 import Foundation
-import SpinPodCore
+import SpinPodsCore
 
 struct RecordedMotionSample {
     let elapsedTime: TimeInterval
@@ -37,4 +37,3 @@ struct RecordedMotionSample {
         self.reading = reading
     }
 }
-

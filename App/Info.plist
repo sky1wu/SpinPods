@@ -5,15 +5,15 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>zh_CN</string>
     <key>CFBundleDisplayName</key>
-    <string>SpinPod 验证器</string>
+    <string>SpinPods 验证器</string>
     <key>CFBundleExecutable</key>
-    <string>SpinPodMac</string>
+    <string>SpinPodsMac</string>
     <key>CFBundleIdentifier</key>
-    <string>com.spinpod.validator</string>
+    <string>com.spinpods.validator</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>SpinPod</string>
+    <string>SpinPods</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -25,7 +25,7 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSMotionUsageDescription</key>
-    <string>SpinPod 需要读取 AirPods 的运动传感器数据，以验证黑胶唱机转速测量是否可行。</string>
+    <string>SpinPods 需要读取 AirPods 的运动传感器数据，以验证黑胶唱机转速测量是否可行。</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
 </dict>

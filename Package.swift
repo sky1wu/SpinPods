@@ -3,28 +3,28 @@
 import PackageDescription
 
 let package = Package(
-    name: "SpinPod",
+    name: "SpinPods",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .library(name: "SpinPodCore", targets: ["SpinPodCore"]),
-        .executable(name: "SpinPodMac", targets: ["SpinPodMac"]),
-        .executable(name: "SpinPodCoreChecks", targets: ["SpinPodCoreChecks"])
+        .library(name: "SpinPodsCore", targets: ["SpinPodsCore"]),
+        .executable(name: "SpinPodsMac", targets: ["SpinPodsMac"]),
+        .executable(name: "SpinPodsCoreChecks", targets: ["SpinPodsCoreChecks"])
     ],
     targets: [
-        .target(name: "SpinPodCore"),
+        .target(name: "SpinPodsCore"),
         .executableTarget(
-            name: "SpinPodMac",
-            dependencies: ["SpinPodCore"],
+            name: "SpinPodsMac",
+            dependencies: ["SpinPodsCore"],
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("CoreMotion")
             ]
         ),
         .executableTarget(
-            name: "SpinPodCoreChecks",
-            dependencies: ["SpinPodCore"]
+            name: "SpinPodsCoreChecks",
+            dependencies: ["SpinPodsCore"]
         )
     ],
     swiftLanguageModes: [.v5]

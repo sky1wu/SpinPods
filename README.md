@@ -1,6 +1,6 @@
-# SpinPod Mac 验证器
+# SpinPods Mac 验证器
 
-SpinPod 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `CMHeadphoneMotionManager` API 读取 AirPods 运动数据，用陀螺仪角速度估算黑胶唱机转速，并保存原始 CSV 供复核。
+SpinPods 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `CMHeadphoneMotionManager` API 读取 AirPods 运动数据，用陀螺仪角速度估算黑胶唱机转速，并保存原始 CSV 供复核。
 
 > AirPods 4 ANC 实测确认：关闭“自动人耳检测”后，AirPod 离耳放置于转盘时可持续取得运动数据；保持开启时离耳不上报。33 ⅓ 和 45 RPM 测试均获得稳定读数，详见[可行性报告](docs/FEASIBILITY_REPORT.md)。
 
@@ -32,15 +32,15 @@ SpinPod 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `CM
 ./scripts/run-app.sh
 ```
 
-脚本会通过 Swift Package Manager 编译，在 `.build/SpinPod.app` 组装标准应用包，加入必需的 `NSMotionUsageDescription`，进行本机临时签名并启动。首次点击“开始测量”时，请允许访问运动与健身数据。
+脚本会通过 Swift Package Manager 编译，在 `.build/SpinPods.app` 组装标准应用包，加入必需的 `NSMotionUsageDescription`，进行本机临时签名并启动。首次点击“开始测量”时，请允许访问运动与健身数据。
 
-不要直接使用 `swift run SpinPodMac` 做硬件测试：裸可执行文件没有应用包内的隐私用途声明，Core Motion 可能因此终止进程。
+不要直接使用 `swift run SpinPodsMac` 做硬件测试：裸可执行文件没有应用包内的隐私用途声明，Core Motion 可能因此终止进程。
 
 单独构建或运行算法检查：
 
 ```sh
 ./scripts/build-app.sh release
-swift run SpinPodCoreChecks
+swift run SpinPodsCoreChecks
 ```
 
 ## 测量原理
@@ -65,9 +65,9 @@ RPM = |ω| × 60 / (2π)
 
 ```text
 App/Info.plist                 应用元数据和运动权限用途声明
-Sources/SpinPodCore/           与 Apple 框架解耦的 RPM 算法
-Sources/SpinPodCoreChecks/     零依赖算法检查
-Sources/SpinPodMac/            SwiftUI 界面、Core Motion 采样和 CSV 导出
+Sources/SpinPodsCore/          与 Apple 框架解耦的 RPM 算法
+Sources/SpinPodsCoreChecks/    零依赖算法检查
+Sources/SpinPodsMac/           SwiftUI 界面、Core Motion 采样和 CSV 导出
 scripts/build-app.sh           编译、组装和签名 .app
 scripts/run-app.sh             构建并启动
 ```

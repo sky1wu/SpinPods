@@ -1,5 +1,5 @@
 import Foundation
-import SpinPodCore
+import SpinPodsCore
 
 private enum CheckFailure: Error, CustomStringConvertible {
     case failed(String)
@@ -12,7 +12,7 @@ private enum CheckFailure: Error, CustomStringConvertible {
 }
 
 @main
-struct SpinPodCoreChecks {
+struct SpinPodsCoreChecks {
     static func main() throws {
         let checks: [(String, () throws -> Void)] = [
             ("radians per second conversion", checkRadiansPerSecondConversion),
@@ -27,7 +27,7 @@ struct SpinPodCoreChecks {
             try check()
             print("✓ \(name)")
         }
-        print("All \(checks.count) SpinPodCore checks passed.")
+        print("All \(checks.count) SpinPodsCore checks passed.")
     }
 
     private static func expect(

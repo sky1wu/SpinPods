@@ -1,5 +1,5 @@
 import AppKit
-import SpinPodCore
+import SpinPodsCore
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -37,7 +37,7 @@ struct ContentView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("SpinPod")
+                Text("SpinPods")
                     .font(.system(size: 30, weight: .bold, design: .rounded))
                 Text("AirPods 转盘转速可行性验证器")
                     .foregroundStyle(.secondary)
@@ -224,8 +224,8 @@ struct ContentView: View {
         }
 
         let panel = NSSavePanel()
-        panel.title = "导出 SpinPod 测量数据"
-        panel.nameFieldStringValue = "spinpod-measurement.csv"
+        panel.title = "导出 SpinPods 测量数据"
+        panel.nameFieldStringValue = "spinpods-measurement.csv"
         panel.allowedContentTypes = [.commaSeparatedText]
         panel.canCreateDirectories = true
 

@@ -1,7 +1,7 @@
 import Combine
 import CoreMotion
 import Foundation
-import SpinPodCore
+import SpinPodsCore
 
 final class HeadphoneMotionMonitor: NSObject, ObservableObject {
     enum State: Equatable {
@@ -36,7 +36,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
             case .unavailable:
                 return "没有检测到兼容的耳机运动数据。请连接 AirPods 后重试。"
             case .denied:
-                return "请在系统设置 → 隐私与安全性 → 运动与健身中允许 SpinPod。"
+                return "请在系统设置 → 隐私与安全性 → 运动与健身中允许 SpinPods。"
             case .disconnected:
                 return "重新连接 AirPods 后，程序会再次检查。"
             case let .failed(message):
