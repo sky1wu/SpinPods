@@ -42,7 +42,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
         var detail: String {
             switch self {
             case .idle:
-                return "请确保支持空间音频的 AirPods 已连接到这台 Mac。"
+                return "请确保支持空间音频的 AirPods 已连接到当前设备。"
             case .ready:
                 return "开始前请关闭自动人耳检测并固定 AirPod，再启动转盘。"
             case .measuring:
