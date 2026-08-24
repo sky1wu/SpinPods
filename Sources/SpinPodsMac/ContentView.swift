@@ -180,7 +180,7 @@ struct ContentView: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "exclamationmark.shield.fill")
                 .foregroundStyle(.orange)
-            Text("实测前请用可移除胶泥或软质固定座，把单只 AirPod 牢固固定并尽量靠近转盘圆心；先从 33 ⅓ RPM 开始。不要把未固定的耳机直接放到旋转中的转盘上。")
+            Text("实测前请用可移除胶泥或软质固定座，把单只 AirPod 牢固固定并尽量靠近转盘圆心；重复测量请始终使用同一侧耳机。不要把未固定的耳机直接放到旋转中的转盘上。")
                 .font(.callout)
                 .foregroundStyle(.secondary)
             Spacer()
