@@ -17,6 +17,7 @@ struct ContentView: View {
             VStack(spacing: 18) {
                 header
                 statusPanel
+                automaticEarDetectionNotice
                 measurementPanel
                 safetyNotice
             }
@@ -42,7 +43,7 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Picker("目标转速", selection: $targetSpeed) {
+            Picker("标称转速", selection: $targetSpeed) {
                 ForEach(TurntableSpeed.allCases, id: \.self) { speed in
                     Text("\(speed.rawValue) RPM").tag(speed)
                 }
@@ -105,7 +106,7 @@ struct ContentView: View {
 
             HStack(spacing: 12) {
                 MetricCard(
-                    label: "相对误差",
+                    label: "相对标称",
                     value: measuredRPM == 0 ? "—" : errorPercent.formatted(.number.precision(.fractionLength(2))) + "%",
                     tint: abs(errorPercent) <= 1 && measuredRPM > 0 ? .green : .orange
                 )
@@ -150,6 +151,28 @@ struct ContentView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+        }
+    }
+
+    private var automaticEarDetectionNotice: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "ear")
+                .font(.title3)
+                .foregroundStyle(.blue)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("离耳测量前必须关闭“自动人耳检测”")
+                    .font(.headline)
+                Text("打开系统设置 → 蓝牙 → AirPods 右侧的 ⓘ，关闭“自动人耳检测”。开启时，AirPod 离耳后不会上报运动数据。")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(14)
+        .background(Color.blue.opacity(0.09), in: RoundedRectangle(cornerRadius: 12))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.blue.opacity(0.2), lineWidth: 1)
         }
     }
 
@@ -268,11 +291,10 @@ private struct RPMHistoryView: View {
         .padding(.vertical, 8)
         .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 10))
         .overlay(alignment: .topLeading) {
-            Text("最近 24 秒 · 虚线为目标")
+            Text("最近 24 秒 · 虚线为标称")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .padding(8)
         }
     }
 }
-
