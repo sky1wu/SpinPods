@@ -3,6 +3,20 @@ import CoreMotion
 import Foundation
 import SpinPodsCore
 
+enum AirPodSide: String, CaseIterable, Identifiable {
+    case left
+    case right
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .left: return "左耳"
+        case .right: return "右耳"
+        }
+    }
+}
+
 final class HeadphoneMotionMonitor: NSObject, ObservableObject {
     enum State: Equatable {
         case idle
@@ -51,6 +65,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
     @Published private(set) var sampleCount = 0
     @Published private(set) var latestRotationRate = MotionVector(x: 0, y: 0, z: 0)
     @Published private(set) var rpmHistory: [Double] = []
+    @Published private(set) var sessionAirPodSide: AirPodSide?
 
     var hasSamples: Bool { !recordedSamples.isEmpty }
     var isMeasuring: Bool { state == .measuring }
@@ -85,7 +100,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
         }
     }
 
-    func startMeasuring() {
+    func startMeasuring(airPodSide: AirPodSide) {
         guard !isMeasuring else { return }
 
         switch CMHeadphoneMotionManager.authorizationStatus() {
@@ -105,6 +120,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
         }
 
         resetSession()
+        sessionAirPodSide = airPodSide
         state = .measuring
 
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
@@ -133,7 +149,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
     }
 
     func csvData() -> Data? {
-        CSVEncoder.encode(recordedSamples).data(using: .utf8)
+        CSVEncoder.encode(recordedSamples, airPodSide: sessionAirPodSide).data(using: .utf8)
     }
 
     private func resetSession() {
@@ -147,6 +163,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
         sampleRateHz = 0
         sampleCount = 0
         latestRotationRate = MotionVector(x: 0, y: 0, z: 0)
+        sessionAirPodSide = nil
     }
 
     private func consume(_ motion: CMDeviceMotion) {

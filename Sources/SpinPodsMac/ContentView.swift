@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @ObservedObject var monitor: HeadphoneMotionMonitor
     @State private var targetSpeed: TurntableSpeed = .rpm33
+    @State private var selectedAirPodSide: AirPodSide = .left
     @State private var exportError: String?
 
     private var measuredRPM: Double { monitor.reading?.smoothedRPM ?? 0 }
@@ -50,6 +51,13 @@ struct ContentView: View {
             }
             .pickerStyle(.segmented)
             .frame(width: 310)
+            Picker("测量耳机", selection: $selectedAirPodSide) {
+                ForEach(AirPodSide.allCases) { side in
+                    Text(side.title).tag(side)
+                }
+            }
+            .frame(width: 120)
+            .disabled(monitor.isMeasuring)
         }
     }
 
@@ -71,7 +79,9 @@ struct ContentView: View {
                 Button("重新检查") { monitor.refreshAvailability() }
             }
             Button(monitor.isMeasuring ? "停止" : "开始测量") {
-                monitor.isMeasuring ? monitor.stopMeasuring() : monitor.startMeasuring()
+                monitor.isMeasuring
+                    ? monitor.stopMeasuring()
+                    : monitor.startMeasuring(airPodSide: selectedAirPodSide)
             }
             .buttonStyle(.borderedProminent)
             .disabled(!canToggleMeasurement)

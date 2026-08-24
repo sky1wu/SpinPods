@@ -1,9 +1,9 @@
 import Foundation
 
 enum CSVEncoder {
-    static func encode(_ samples: [RecordedMotionSample]) -> String {
+    static func encode(_ samples: [RecordedMotionSample], airPodSide: AirPodSide?) -> String {
         var rows = [
-            "elapsed_s,device_timestamp_s,gyro_x_rad_s,gyro_y_rad_s,gyro_z_rad_s,gyro_magnitude_rad_s,raw_rpm,filtered_rpm,rpm_stddev,is_stable,user_accel_x_g,user_accel_y_g,user_accel_z_g,gravity_x_g,gravity_y_g,gravity_z_g,roll_rad,pitch_rad,yaw_rad"
+            "elapsed_s,device_timestamp_s,gyro_x_rad_s,gyro_y_rad_s,gyro_z_rad_s,gyro_magnitude_rad_s,raw_rpm,filtered_rpm,rpm_stddev,is_stable,user_accel_x_g,user_accel_y_g,user_accel_z_g,gravity_x_g,gravity_y_g,gravity_z_g,roll_rad,pitch_rad,yaw_rad,airpod_side"
         ]
         rows.reserveCapacity(samples.count + 1)
 
@@ -27,7 +27,8 @@ enum CSVEncoder {
                 number(sample.gravity.z),
                 number(sample.roll),
                 number(sample.pitch),
-                number(sample.yaw)
+                number(sample.yaw),
+                airPodSide?.rawValue ?? ""
             ].joined(separator: ","))
         }
 
@@ -38,4 +39,3 @@ enum CSVEncoder {
         String(format: "%.8f", locale: Locale(identifier: "en_US_POSIX"), value)
     }
 }
-
