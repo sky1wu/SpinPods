@@ -1,0 +1,10 @@
+.DS_Store
+.build/
+.swiftpm/
+DerivedData/
+*.xcuserstate
+
+# Locally exported measurements
+Exports/
+*.csv
+
