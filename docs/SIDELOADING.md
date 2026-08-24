@@ -53,7 +53,7 @@ SpinPods 当前使用 Core Motion 和 `NSMotionUsageDescription`，不需要额�
 3. 在 Finder 中启用“连接 Wi-Fi 时显示此 iPhone/iPad”。
 4. 通过 AltServer 安装 AltStore Classic，并使用普通 Apple ID 完成签名。
 5. iOS/iPadOS 16 或更高版本需要在“设置 → 隐私与安全性 → 开发者模式”中开启 Developer Mode。
-6. 从 GitHub Actions 下载并解压 artifact，把 `SpinPods-unsigned.ipa` 导入 AltStore 安装。
+6. 从单次 GitHub Actions 运行页底部的 Artifacts 区域下载并解压 artifact，或从版本标签自动创建的 GitHub Release 下载 `SpinPods-unsigned.ipa`，再导入 AltStore 安装。
 7. 保持设备与运行 AltServer 的 Mac 处于同一网络，定期打开 AltStore 检查刷新状态。
 
 也可以在 macOS 按住 Option 点击 AltServer 菜单，直接选择“Sideload .ipa…”，无需先安装 AltStore；但这种方式需要每 7 天手动重新安装。

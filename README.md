@@ -103,7 +103,16 @@ scripts/package-unsigned-ipa.sh 将 device .app 打包为可重签名 IPA
 
 ## iPhone / iPad CI 构建
 
-推送到 GitHub 后，[iOS and iPadOS](.github/workflows/ios.yml) workflow 会依次运行核心算法检查、iPhone Simulator 构建、iPad Simulator 构建和无签名 `iphoneos` Release 构建，并上传 `SpinPods-unsigned.ipa`。当前工程最低支持 iOS/iPadOS 17，target 同时包含 iPhone 与 iPad device family。
+推送到 GitHub 后，[iOS and iPadOS](.github/workflows/ios.yml) workflow 会依次运行核心算法检查、iPhone Simulator 构建、iPad Simulator 构建和无签名 `iphoneos` Release 构建。普通分支推送的 `SpinPods-unsigned.ipa` 位于对应 Actions 运行页底部的 Artifacts 区域，保留 14 天。
+
+需要在仓库 Releases 页面生成可长期下载的 IPA 时，推送以 `v` 开头的版本标签：
+
+```shell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+CI 通过后会自动创建 `SpinPods v0.1.0` GitHub Release，并将 `SpinPods-unsigned.ipa` 作为 Release asset。当前工程最低支持 iOS/iPadOS 17，target 同时包含 iPhone 与 iPad device family。
 
 Simulator 只能验证编译和自适应界面，不能提供 AirPods 耳机运动数据。真机安装与验证方式见[无付费开发者账号的安装方案](docs/SIDELOADING.md)。
 
