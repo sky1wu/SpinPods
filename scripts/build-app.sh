@@ -14,7 +14,7 @@ case "$configuration" in
 esac
 
 cd "$project_dir"
-swift build --configuration "$configuration" --product SpinPodsMac
+swift build --configuration "$configuration" --product SpinPodsMac >&2
 binary_dir=$(swift build --configuration "$configuration" --show-bin-path)
 
 app_path="$project_dir/.build/SpinPods.app"
@@ -28,4 +28,4 @@ cp "$binary_dir/SpinPodsMac" "$executable_path/SpinPodsMac"
 cp "$project_dir/App/Info.plist" "$contents_path/Info.plist"
 
 codesign --force --sign - "$app_path"
-echo "$app_path"
+print -r -- "$app_path"
