@@ -2,13 +2,13 @@
 
 SpinPod 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `CMHeadphoneMotionManager` API 读取 AirPods 运动数据，用陀螺仪角速度估算黑胶唱机转速，并保存原始 CSV 供复核。
 
-> 目前已验证软件构建、打包、签名和转速算法；是否能在 AirPod 离耳并固定于转盘时持续取得运动数据，必须用真实耳机完成实验。这是本原型需要回答的核心问题。
+> AirPods 4 ANC 实测确认：关闭“自动人耳检测”后，AirPod 离耳放置于转盘时可持续取得运动数据；保持开启时离耳不上报。33 ⅓ 和 45 RPM 测试均获得稳定读数，详见[可行性报告](docs/FEASIBILITY_REPORT.md)。
 
 ## 功能
 
 - 检查运动权限和兼容 AirPods 的数据可用性
 - 实时显示瞬时 RPM、1.5 秒滤波 RPM、波动、采样率和样本数
-- 以 33 ⅓、45 或 78 RPM 为目标显示相对误差
+- 以 33 ⅓、45 或 78 RPM 为档位标称值显示相对偏移
 - 通过角速度向量模长计算 RPM，不依赖 AirPod 在盘面上的朝向
 - 使用滚动中位数和 MAD 过滤偶发运动尖峰
 - 导出每一个 IMU 样本，包括角速度、用户加速度、重力、姿态和 RPM
@@ -19,6 +19,8 @@ SpinPod 的第一阶段可行性原型：在 macOS 上通过 Apple 的公开 `CM
 - macOS 14 或更高版本
 - 支持耳机运动数据的 AirPods，且已经通过蓝牙连接至 Mac
 - Apple Swift 6 / Xcode Command Line Tools；不依赖第三方库
+
+离耳测量前必须在“系统设置 → 蓝牙 → AirPods 右侧的 ⓘ”中关闭“自动人耳检测”。应用无法通过公开 API 自动更改或可靠读取这项设置。
 
 程序会以运行时的 `isDeviceMotionAvailable` 为最终兼容性判断，不硬编码耳机型号。
 
@@ -51,7 +53,9 @@ RPM = |ω| × 60 / (2π)
 
 ## 如何验证可行性
 
-请按 [实机验证方案](docs/VALIDATION_PROTOCOL.md) 依次测试佩戴、离耳静止、33 ⅓ RPM 和 45 RPM 四种情况。最关键的判定是：AirPod 离耳后能否连续至少 60 秒提供运动样本；如果系统停止上报，单靠当前公开 API 就无法实现预期的“AirPods 放在转盘上”使用方式。
+首轮 [A–D 实机测试结果](docs/FEASIBILITY_REPORT.md) 已确认公开 API 路径可行。离耳静止状态连续采样 71.6 秒，33 ⅓ 和 45 RPM 工况分别连续采样约 64.0 和 69.6 秒。两档读数稳定，相对转盘档位的标称速度均高约 1.3%；由于转盘实际转速未知，这不是 SpinPod 的准确度或误差结论，必须用独立转速基准才能评估。
+
+后续复测请遵循[实机验证方案](docs/VALIDATION_PROTOCOL.md)，使用可靠的参考转速、固定 AirPod，并分别重复多次。
 
 ## 项目结构
 
@@ -65,4 +69,3 @@ scripts/run-app.sh             构建并启动
 ```
 
 API 依据：[CMHeadphoneMotionManager](https://developer.apple.com/documentation/coremotion/cmheadphonemotionmanager)、[NSMotionUsageDescription](https://developer.apple.com/documentation/bundleresources/information-property-list/nsmotionusagedescription)。Apple 明确要求 iOS 和 macOS 应用提供运动数据用途声明，并建议在采样前检查 `isDeviceMotionAvailable`。
-
