@@ -148,9 +148,11 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
         refreshAvailability()
     }
 
+    #if os(macOS)
     func csvData() -> Data? {
         CSVEncoder.encode(recordedSamples, airPodSide: sessionAirPodSide).data(using: .utf8)
     }
+    #endif
 
     private func resetSession() {
         estimator.reset()
