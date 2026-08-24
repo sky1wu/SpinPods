@@ -4,10 +4,13 @@ import SwiftUI
 struct SpinPodsContentView: View {
     @ObservedObject var monitor: HeadphoneMotionMonitor
 
+    private let targetTolerancePercent = 1.0
+
     @AppStorage("didConfirmAutomaticEarDetectionDisabled")
     private var didConfirmAutomaticEarDetectionDisabled = false
 
     @Environment(\.scenePhase) private var scenePhase
+    @State private var targetSpeed: TurntableSpeed = .rpm33
     @State private var selectedAirPodSide: AirPodSide = .left
     @State private var isShowingSetup = false
 
@@ -15,14 +18,16 @@ struct SpinPodsContentView: View {
         NavigationStack {
             GeometryReader { geometry in
                 ScrollView {
-                    VStack(spacing: 32) {
+                    VStack(spacing: 26) {
                         connectionStatus
                         rpmReading
-                        airPodSidePicker
+                        targetComparison
+                        speedTrend
+                        measurementOptions
                         measurementButton
                         preparationReminder
                     }
-                    .frame(maxWidth: 520)
+                    .frame(maxWidth: 560)
                     .frame(
                         maxWidth: .infinity,
                         minHeight: geometry.size.height,
@@ -152,6 +157,74 @@ struct SpinPodsContentView: View {
         .frame(maxWidth: 300)
     }
 
+    private var targetComparison: some View {
+        VStack(spacing: 6) {
+            if let assessment {
+                Label(comparisonTitle(for: assessment), systemImage: comparisonSymbol(for: assessment))
+                    .font(.headline)
+                    .foregroundStyle(comparisonColor(for: assessment))
+                Text(
+                    "当前 − 目标 \(signed(assessment.differenceRPM, fractionLength: 2)) RPM"
+                        + " · \(signed(assessment.differencePercent, fractionLength: 2))%"
+                )
+                .font(.subheadline.monospacedDigit())
+            }
+
+            Text(acceptableRangeDescription)
+                .font(.footnote.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+    }
+
+    private var speedTrend: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Text("转速趋势")
+                    .font(.subheadline.weight(.medium))
+                Spacer()
+                Text("绿色区间 ±\(targetTolerancePercent.formatted(.number))%")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            RPMTrendChart(
+                values: monitor.rpmHistory,
+                targetRPM: targetSpeed.rpm,
+                tolerancePercent: targetTolerancePercent
+            )
+            .frame(height: 126)
+        }
+    }
+
+    private var measurementOptions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: 24) {
+                targetSpeedPicker
+                airPodSidePicker
+            }
+            VStack(spacing: 18) {
+                targetSpeedPicker
+                airPodSidePicker
+            }
+        }
+    }
+
+    private var targetSpeedPicker: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text("目标转速")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Picker("目标转速", selection: $targetSpeed) {
+                ForEach(TurntableSpeed.allCases, id: \.self) { speed in
+                    Text(speed.rawValue).tag(speed)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+        .frame(maxWidth: 320)
+    }
+
     @ViewBuilder
     private var measurementButton: some View {
         if monitor.isMeasuring {
@@ -198,6 +271,25 @@ struct SpinPodsContentView: View {
         return reading.smoothedRPM.formatted(.number.precision(.fractionLength(2)))
     }
 
+    private var assessment: SpeedAssessment? {
+        guard let reading = monitor.reading else { return nil }
+        return targetSpeed.assess(
+            measuredRPM: reading.smoothedRPM,
+            tolerancePercent: targetTolerancePercent
+        )
+    }
+
+    private var acceptableRangeDescription: String {
+        let range = targetSpeed.assess(
+            measuredRPM: targetSpeed.rpm,
+            tolerancePercent: targetTolerancePercent
+        )
+        let target = targetSpeed.rpm.formatted(.number.precision(.fractionLength(2)))
+        let lower = range.lowerBoundRPM.formatted(.number.precision(.fractionLength(2)))
+        let upper = range.upperBoundRPM.formatted(.number.precision(.fractionLength(2)))
+        return "目标 \(target) RPM · 可接受 \(lower)–\(upper) RPM"
+    }
+
     private var canStartMeasurement: Bool {
         monitor.state == .ready && didConfirmAutomaticEarDetectionDisabled
     }
@@ -223,6 +315,34 @@ struct SpinPodsContentView: View {
 
     private func formattedDeviation(_ value: Double) -> String {
         value.formatted(.number.precision(.fractionLength(3)))
+    }
+
+    private func comparisonTitle(for assessment: SpeedAssessment) -> String {
+        switch assessment.status {
+        case .withinRange: return "目标范围内"
+        case .tooSlow: return "转速过慢"
+        case .tooFast: return "转速过快"
+        }
+    }
+
+    private func comparisonSymbol(for assessment: SpeedAssessment) -> String {
+        switch assessment.status {
+        case .withinRange: return "checkmark.circle.fill"
+        case .tooSlow: return "arrow.down.circle.fill"
+        case .tooFast: return "arrow.up.circle.fill"
+        }
+    }
+
+    private func comparisonColor(for assessment: SpeedAssessment) -> Color {
+        assessment.status == .withinRange ? .green : .orange
+    }
+
+    private func signed(_ value: Double, fractionLength: Int) -> String {
+        let sign = value >= 0 ? "+" : "−"
+        let magnitude = abs(value).formatted(
+            .number.precision(.fractionLength(fractionLength))
+        )
+        return sign + magnitude
     }
 }
 
@@ -300,5 +420,105 @@ private struct MeasurementSetupView: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+private struct RPMTrendChart: View {
+    let values: [Double]
+    let targetRPM: Double
+    let tolerancePercent: Double
+
+    var body: some View {
+        GeometryReader { proxy in
+            let lowerTarget = targetRPM * (1 - tolerancePercent / 100)
+            let upperTarget = targetRPM * (1 + tolerancePercent / 100)
+            let minimumValue = min(values.min() ?? lowerTarget, lowerTarget)
+            let maximumValue = max(values.max() ?? upperTarget, upperTarget)
+            let contentSpan = max(maximumValue - minimumValue, targetRPM * 0.01, 0.2)
+            let graphMinimum = max(minimumValue - contentSpan * 0.16, 0)
+            let graphMaximum = maximumValue + contentSpan * 0.16
+            let graphRange = max(graphMaximum - graphMinimum, 0.1)
+            let size = proxy.size
+            let upperTargetY = yPosition(
+                for: upperTarget,
+                graphMinimum: graphMinimum,
+                graphRange: graphRange,
+                height: size.height
+            )
+            let lowerTargetY = yPosition(
+                for: lowerTarget,
+                graphMinimum: graphMinimum,
+                graphRange: graphRange,
+                height: size.height
+            )
+            let targetY = yPosition(
+                for: targetRPM,
+                graphMinimum: graphMinimum,
+                graphRange: graphRange,
+                height: size.height
+            )
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.secondarySystemBackground))
+
+                Path { path in
+                    path.addRect(CGRect(
+                        x: 0,
+                        y: upperTargetY,
+                        width: size.width,
+                        height: max(lowerTargetY - upperTargetY, 1)
+                    ))
+                }
+                .fill(Color.green.opacity(0.1))
+
+                Path { path in
+                    path.move(to: CGPoint(x: 0, y: targetY))
+                    path.addLine(to: CGPoint(x: size.width, y: targetY))
+                }
+                .stroke(
+                    Color.secondary.opacity(0.6),
+                    style: StrokeStyle(lineWidth: 1, dash: [5, 4])
+                )
+
+                if values.count >= 2 {
+                    Path { path in
+                        for (index, value) in values.enumerated() {
+                            let x = size.width * CGFloat(index) / CGFloat(values.count - 1)
+                            let y = yPosition(
+                                for: value,
+                                graphMinimum: graphMinimum,
+                                graphRange: graphRange,
+                                height: size.height
+                            )
+                            if index == 0 {
+                                path.move(to: CGPoint(x: x, y: y))
+                            } else {
+                                path.addLine(to: CGPoint(x: x, y: y))
+                            }
+                        }
+                    }
+                    .stroke(
+                        Color.blue,
+                        style: StrokeStyle(lineWidth: 2, lineJoin: .round, lineCap: .round)
+                    )
+                } else {
+                    Text("开始测量后显示趋势")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .accessibilityLabel("转速趋势，绿色区域为目标容差范围")
+    }
+
+    private func yPosition(
+        for value: Double,
+        graphMinimum: Double,
+        graphRange: Double,
+        height: CGFloat
+    ) -> CGFloat {
+        height * CGFloat(1 - (value - graphMinimum) / graphRange)
     }
 }
