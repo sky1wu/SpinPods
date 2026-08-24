@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Show toolchain
         run: |
@@ -94,7 +94,7 @@ jobs:
           unzip -t .artifacts/SpinPods-unsigned.ipa
 
       - name: Upload unsigned IPA
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SpinPods-unsigned-${{ github.sha }}
           path: .artifacts/SpinPods-unsigned.ipa
@@ -111,7 +111,7 @@ jobs:
 
     steps:
       - name: Download unsigned IPA
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: SpinPods-unsigned-${{ github.sha }}
           path: .artifacts
