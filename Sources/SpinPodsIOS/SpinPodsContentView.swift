@@ -1,5 +1,6 @@
 import SpinPodsCore
 import SwiftUI
+import UIKit
 
 struct SpinPodsContentView: View {
     @ObservedObject var monitor: HeadphoneMotionMonitor
@@ -58,6 +59,13 @@ struct SpinPodsContentView: View {
         .tint(.blue)
         .onAppear {
             isShowingSetup = !didConfirmAutomaticEarDetectionDisabled
+            updateIdleTimer(isMeasuring: monitor.isMeasuring)
+        }
+        .onDisappear {
+            updateIdleTimer(isMeasuring: monitor.isMeasuring)
+        }
+        .onChange(of: monitor.isMeasuring) { _, isMeasuring in
+            updateIdleTimer(isMeasuring: isMeasuring)
         }
         .onChange(of: selectedAirPodSide) { _, _ in
             if !monitor.isMeasuring && monitor.hasSamples {
@@ -67,8 +75,12 @@ struct SpinPodsContentView: View {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 monitor.refreshAvailability()
-            } else if monitor.isMeasuring {
-                monitor.stopMeasuring()
+                updateIdleTimer(isMeasuring: monitor.isMeasuring)
+            } else {
+                updateIdleTimer(isMeasuring: false)
+                if monitor.isMeasuring {
+                    monitor.stopMeasuring()
+                }
             }
         }
         .fullScreenCover(isPresented: $isShowingSetup) {
@@ -349,6 +361,10 @@ struct SpinPodsContentView: View {
             .number.precision(.fractionLength(fractionLength))
         )
         return sign + magnitude
+    }
+
+    private func updateIdleTimer(isMeasuring: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = isMeasuring
     }
 }
 

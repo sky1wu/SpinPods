@@ -28,6 +28,7 @@ GitHub Actions 将分别执行 iPhone 与 iPad Simulator 构建检查；自适�
 
 - 检查运动权限和兼容 AirPods 的数据可用性
 - iPhone/iPad app 实时显示滤波 RPM、转速趋势以及与 33 ⅓、45 或 78 RPM 目标的差值
+- iPhone/iPad 测量期间保持屏幕常亮，停止测量或进入后台后恢复系统自动锁屏
 - 以目标转速 ±1% 为可接受区间，超出时显示过快或过慢；趋势图使用同一容差带
 - Mac 验证器额外显示瞬时 RPM、波动、采样率和样本数
 - 通过角速度向量模长计算 RPM，不依赖 AirPod 在盘面上的朝向
