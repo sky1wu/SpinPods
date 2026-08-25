@@ -5,6 +5,7 @@ struct SpinPodsContentView: View {
     @ObservedObject var monitor: HeadphoneMotionMonitor
 
     private let targetTolerancePercent = 1.0
+    private let mainVerticalPadding: CGFloat = 28
 
     @AppStorage("didConfirmAutomaticEarDetectionDisabled")
     private var didConfirmAutomaticEarDetectionDisabled = false
@@ -30,12 +31,17 @@ struct SpinPodsContentView: View {
                     .frame(maxWidth: 560)
                     .frame(
                         maxWidth: .infinity,
-                        minHeight: geometry.size.height,
+                        minHeight: Swift.max(
+                            geometry.size.height - mainVerticalPadding * 2,
+                            0
+                        ),
                         alignment: .center
                     )
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 28)
+                    .padding(.vertical, mainVerticalPadding)
                 }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
             .background(Color(.systemBackground))
             .navigationTitle("SpinPods")
