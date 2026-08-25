@@ -51,7 +51,7 @@ GitHub Actions 将分别执行 iPhone 与 iPad Simulator 构建检查；自适�
 
 离耳测量前必须在“系统设置 → 蓝牙 → AirPods 右侧的 ⓘ”中关闭“自动人耳检测”。应用无法通过公开 API 自动更改或可靠读取这项设置。
 
-程序会以运行时的 `isDeviceMotionAvailable` 为最终兼容性判断，不硬编码耳机型号。
+程序会通过 `CMHeadphoneMotionManagerDelegate` 的连接回调判断耳机是否已连接，再以运行时的 `isDeviceMotionAvailable` 判断运动数据兼容性，不硬编码耳机型号。
 
 ## 构建和运行
 

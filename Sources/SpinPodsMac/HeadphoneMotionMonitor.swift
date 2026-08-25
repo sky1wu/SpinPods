@@ -34,7 +34,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
             case .measuring: return "正在采样"
             case .unavailable: return "运动数据不可用"
             case .denied: return "运动权限被拒绝"
-            case .disconnected: return "AirPods 已断开"
+            case .disconnected: return "AirPods 未连接"
             case .failed: return "采样出错"
             }
         }
@@ -52,7 +52,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
             case .denied:
                 return "请在系统设置 → 隐私与安全性 → 运动与健身中允许 SpinPods。"
             case .disconnected:
-                return "重新连接 AirPods 后，程序会再次检查。"
+                return "连接支持运动数据的 AirPods 后，程序会自动再次检查。"
             case let .failed(message):
                 return message
             }
@@ -76,6 +76,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
     private var sessionStartTimestamp: TimeInterval?
     private var recentTimestamps: [TimeInterval] = []
     private var lastPublishedTimestamp: TimeInterval = -.infinity
+    private var isHeadphoneConnected = false
 
     override init() {
         super.init()
@@ -94,6 +95,10 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
         case .denied, .restricted:
             state = .denied
         case .authorized, .notDetermined:
+            guard isHeadphoneConnected else {
+                state = .disconnected
+                return
+            }
             state = motionManager.isDeviceMotionAvailable ? .ready : .unavailable
         @unknown default:
             state = .unavailable
@@ -111,6 +116,11 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
             break
         @unknown default:
             state = .unavailable
+            return
+        }
+
+        guard isHeadphoneConnected else {
+            state = .disconnected
             return
         }
 
@@ -138,7 +148,7 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
     func stopMeasuring() {
         motionManager.stopDeviceMotionUpdates()
         if state == .measuring {
-            state = motionManager.isDeviceMotionAvailable ? .ready : .unavailable
+            refreshAvailability()
         }
     }
 
@@ -217,7 +227,9 @@ final class HeadphoneMotionMonitor: NSObject, ObservableObject {
 extension HeadphoneMotionMonitor: CMHeadphoneMotionManagerDelegate {
     func headphoneMotionManagerDidConnect(_ manager: CMHeadphoneMotionManager) {
         DispatchQueue.main.async { [weak self] in
-            guard let self, !self.isMeasuring else { return }
+            guard let self else { return }
+            self.isHeadphoneConnected = true
+            guard !self.isMeasuring else { return }
             self.refreshAvailability()
         }
     }
@@ -225,6 +237,7 @@ extension HeadphoneMotionMonitor: CMHeadphoneMotionManagerDelegate {
     func headphoneMotionManagerDidDisconnect(_ manager: CMHeadphoneMotionManager) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
+            self.isHeadphoneConnected = false
             self.motionManager.stopDeviceMotionUpdates()
             self.state = .disconnected
         }
